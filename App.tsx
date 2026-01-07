@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
-import { PERIODICITY_DATA, MILESTONES } from './constants';
-import { Gender, AgeMilestone, ActionType, AgeCalculation, RecommendationItem } from './types';
+import { PERIODICITY_DATA, MILESTONES } from './constants.tsx';
+import { Gender, AgeMilestone, ActionType, RecommendationItem } from './types.ts';
 
 // Componentes de ayuda
 const Badge: React.FC<{ type: ActionType }> = ({ type }) => {
@@ -19,9 +19,9 @@ const Badge: React.FC<{ type: ActionType }> = ({ type }) => {
 
 const Modal: React.FC<{ item: RecommendationItem; action: ActionType; onClose: () => void }> = ({ item, action, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
@@ -43,16 +43,16 @@ const Modal: React.FC<{ item: RecommendationItem; action: ActionType; onClose: (
             <Badge type={action} />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-500 mb-1 uppercase tracking-tight">¿En qué consiste esta evaluación?</h4>
-            <p className="text-slate-700 leading-relaxed text-sm sm:text-base">
-              {item.description || "No hay una descripción detallada disponible para este elemento."}
+            <h4 className="text-sm font-semibold text-slate-500 mb-1 uppercase tracking-tight">Descripción</h4>
+            <p className="text-slate-700 leading-relaxed text-sm">
+              {item.description || "No hay una descripción detallada disponible."}
             </p>
           </div>
         </div>
         <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
           <button 
             onClick={onClose}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-100"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors"
           >
             Entendido
           </button>
@@ -76,7 +76,7 @@ const App: React.FC = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (birthDate > today) return { error: 'La fecha de nacimiento no puede ser en el futuro.' };
+    if (birthDate > today) return { error: 'La fecha no puede ser futura.' };
 
     let years = today.getFullYear() - birthDate.getFullYear();
     let months = today.getMonth() - birthDate.getMonth();
@@ -93,8 +93,7 @@ const App: React.FC = () => {
     }
 
     const totalMonths = (years * 12) + months;
-    const diffTime = today.getTime() - birthDate.getTime();
-    const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const totalDays = Math.floor((today.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24));
 
     return { years, months, days, totalMonths, totalDays };
   }, [dob]);
@@ -103,13 +102,11 @@ const App: React.FC = () => {
     if (!ageData || 'error' in ageData) return null;
     const { totalDays, totalMonths, years } = ageData;
 
-    // 1. Recién nacido y primeros días
+    // Lactantes: Hito inferior (ej: si tiene 3 meses, usa el de 2 meses)
     if (totalDays < 3) return 'Recién nacido';
     if (totalDays < 8) return '3-5 días';
-
-    // 2. Lógica para lactantes (Usar hito inferior/previo según solicitud)
     if (totalMonths < 2) return '1 mes';
-    if (totalMonths < 4) return '2 meses'; // Ejemplo: 3 meses -> Control de los 2 meses
+    if (totalMonths < 4) return '2 meses';
     if (totalMonths < 6) return '4 meses';
     if (totalMonths < 9) return '6 meses';
     if (totalMonths < 12) return '9 meses';
@@ -119,7 +116,7 @@ const App: React.FC = () => {
     if (totalMonths < 30) return '24 meses';
     if (totalMonths < 36) return '30 meses';
 
-    // 3. Niños mayores (Redondear al año más cercano según solicitud)
+    // Niños mayores: Redondeo al año más cercano
     const roundedYears = Math.round(totalMonths / 12);
     const clampedYears = Math.max(3, Math.min(21, roundedYears));
     return `${clampedYears} años` as AgeMilestone;
@@ -148,18 +145,18 @@ const App: React.FC = () => {
           </div>
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Fecha de Nacimiento</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase mb-1">F. Nacimiento</label>
               <input 
                 type="date" 
-                className="px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="px-3 py-2 border border-slate-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Sexo</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase mb-1">Sexo</label>
               <select 
-                className="px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="px-3 py-2 border border-slate-300 rounded-md text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"
                 value={sex}
                 onChange={(e) => setSex(e.target.value as Gender)}
               >
@@ -174,47 +171,34 @@ const App: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 mt-8">
         {!ageData ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
-            <div className="mb-4 text-slate-300 flex justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Guías de Salud</h2>
-            <p className="text-slate-500 max-w-md mx-auto">
-              Ingresa los datos para ver las recomendaciones del cronograma de periodicidad de la AAP.
-            </p>
+            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Seguimiento Preventivo</h2>
+            <p className="text-slate-500">Ingresa los datos para ver las recomendaciones oficiales de la AAP.</p>
           </div>
         ) : 'error' in ageData ? (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center text-red-800 shadow-sm">
-            <p className="font-bold">{ageData.error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center text-red-800 shadow-sm font-bold">
+            {ageData.error}
           </div>
         ) : (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg shadow-blue-100">
+          <div className="space-y-6">
+            <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm font-medium uppercase tracking-wider mb-1">Edad Actual Exacta</p>
+                  <p className="text-blue-100 text-xs font-bold uppercase mb-1">Edad Actual</p>
                   <p className="text-3xl font-bold">
-                    {ageData.years > 0 && `${ageData.years} ${ageData.years === 1 ? 'año' : 'años'} `}
-                    {ageData.months > 0 && `${ageData.months} ${ageData.months === 1 ? 'mes' : 'meses'} `}
-                    {ageData.days > 0 && `${ageData.days} ${ageData.days === 1 ? 'día' : 'días'}`}
-                    {ageData.years === 0 && ageData.months === 0 && ageData.days === 0 && 'Recién nacido'}
+                    {ageData.years > 0 && `${ageData.years}a `}
+                    {ageData.months > 0 && `${ageData.months}m `}
+                    {ageData.days > 0 && `${ageData.days}d`}
                   </p>
-                  <p className="text-blue-200 text-xs mt-1">Edad cronológica: {ageData.totalMonths} meses ({ageData.totalDays} días)</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-blue-100 text-sm font-medium uppercase tracking-wider mb-1">Hito de Control AAP</p>
+                  <p className="text-blue-100 text-xs font-bold uppercase mb-1">Visita Correspondiente</p>
                   <p className="text-xl font-semibold">{currentMilestone}</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-slate-800">Evaluaciones para: {currentMilestone}</h3>
-                <span className="text-xs text-slate-400 font-bold uppercase">Pulsa para ver detalles</span>
-              </div>
-              
+              <h3 className="text-lg font-bold text-slate-800">Checklist de la Visita</h3>
               {Object.entries(
                 recommendationsForVisit.reduce((acc, curr) => {
                   if (!acc[curr.category]) acc[curr.category] = [];
@@ -224,7 +208,7 @@ const App: React.FC = () => {
               ).map(([category, items]) => (
                 <section key={category} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{category}</h4>
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase">{category}</h4>
                   </div>
                   <ul className="divide-y divide-slate-100">
                     {(items as RecommendationItem[]).map((item, idx) => {
@@ -233,14 +217,9 @@ const App: React.FC = () => {
                         <li 
                           key={idx} 
                           onClick={() => setSelectedItem({ item, action })}
-                          className="px-4 py-3 flex items-center justify-between hover:bg-blue-50/50 cursor-pointer group transition-all"
+                          className="px-4 py-3 flex items-center justify-between hover:bg-blue-50 cursor-pointer transition-colors"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-700 font-medium group-hover:text-blue-700">{item.name}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-300 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </div>
+                          <span className="text-slate-700 font-medium">{item.name}</span>
                           <Badge type={action} />
                         </li>
                       );
@@ -249,10 +228,6 @@ const App: React.FC = () => {
                 </section>
               ))}
             </div>
-            
-            <footer className="bg-slate-100 rounded-xl p-4 text-[10px] text-slate-400 leading-relaxed italic border border-slate-200">
-              Aviso legal: Esta herramienta asigna el hito inferior más cercano para lactantes y redondea al año más cercano para mayores de 3 años, facilitando el seguimiento de los controles de la AAP.
-            </footer>
           </div>
         )}
       </main>
