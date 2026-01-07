@@ -1,0 +1,5 @@
+{
+  "name": "Rastreador de Cuidado Pediátrico Preventivo",
+  "description": "Una herramienta integral basada en el cronograma de periodicidad de la AAP para ayudar a padres y médicos a seguir las visitas de salud y tamizajes recomendados desde el nacimiento hasta los 21 años.",
+  "requestFramePermissions": []
+}
