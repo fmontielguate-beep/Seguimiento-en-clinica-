@@ -2,9 +2,9 @@
 export type Gender = 'male' | 'female';
 
 export enum ActionType {
-  PERFORM = 'l',
-  RISK_ASSESSMENT = 'ê',
-  RANGE = 'êor l',
+  PERFORM = 'PERFORM', // Acción obligatoria (punto en la tabla)
+  RISK_ASSESSMENT = 'RISK', // Evaluación de riesgo (asterisco en la tabla)
+  RANGE = 'RANGE', // Rango de edad recomendado
   NONE = ''
 }
 
